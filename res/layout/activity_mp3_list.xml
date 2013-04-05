@@ -22,6 +22,6 @@
 	    android:padding="15dip"  
 	    android:text="nothing"  
 	    android:textSize="22sp"  
-	    android:visibility="visible" />
+	    android:visibility="gone" />
     
 </RelativeLayout>

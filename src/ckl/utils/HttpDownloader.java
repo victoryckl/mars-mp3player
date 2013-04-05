@@ -19,6 +19,7 @@ import android.util.Log;
 
 @SuppressLint("NewApi")
 public class HttpDownloader {
+	private static final String TAG = "HttpDownloader";
 	private URL url = null;
 	
 	/**
@@ -27,6 +28,7 @@ public class HttpDownloader {
 	 * @return text
 	 */
 	public String download(String urlStr) {
+		Log.i(TAG, "download() urlStr = " + urlStr);
 		StringBuffer sb = new StringBuffer();
 		String line = null;
 		BufferedReader buffer = null;
