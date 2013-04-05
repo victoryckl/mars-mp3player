@@ -13,23 +13,26 @@ import org.xml.sax.XMLReader;
 
 import ckl.constant.Constant;
 import ckl.model.Mp3Info;
+import ckl.service.DownloadService;
 import ckl.utils.HttpDownloader;
 import ckl.xml.Mp3ListContentHandler;
 import android.os.Bundle;
 import android.renderscript.Sampler;
 import android.app.Activity;
 import android.app.ListActivity;
+import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 public class Mp3ListActivity extends ListActivity {
 	private static final String TAG = "Mp3ListActivity";
 	private ListView listView;
-
+	private List<Mp3Info> mp3Infos;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -74,7 +77,7 @@ public class Mp3ListActivity extends ListActivity {
 	
 	private void updateListView() {
 		String result = downloadXML(Constant.HOST_ADDRESS + "mp3/resources.xml");
-		List<Mp3Info> mp3Infos = parse(result);
+		mp3Infos = parse(result);
 		SimpleAdapter simpleAdapter = buildSimpleAdapter(mp3Infos);
 		listView.setAdapter(simpleAdapter);
 	}
@@ -107,13 +110,28 @@ public class Mp3ListActivity extends ListActivity {
 			Mp3ListContentHandler mp3ListContentHandler = new Mp3ListContentHandler(mp3Infos);
 			xmlReader.setContentHandler(mp3ListContentHandler);
 			xmlReader.parse(new InputSource(new StringReader(xmlStr)));
-			for (Iterator<Mp3Info> iterator = mp3Infos.iterator(); iterator.hasNext();) {
-				Mp3Info mp3Info = (Mp3Info) iterator.next();
+//			for (Iterator<Mp3Info> iterator = mp3Infos.iterator(); iterator.hasNext();) {
+//				Mp3Info mp3Info = (Mp3Info) iterator.next();
 //				Log.i(TAG, mp3Info.toString());
-			}
+//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return mp3Infos;
+	}
+	
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		Mp3Info mp3Info = mp3Infos.get(position);
+//		Log.i(TAG, "onListItemClick() mp3Info = " + mp3Info);
+		startDownloadService(mp3Info);
+		super.onListItemClick(l, v, position, id);
+	}
+	
+	private void startDownloadService(Mp3Info mp3Info) {
+		Intent intent  = new Intent();
+		intent.putExtra("mp3Info", mp3Info);
+		intent.setClass(this, DownloadService.class);
+		startService(intent);
 	}
 }
