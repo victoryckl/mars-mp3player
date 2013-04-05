@@ -5,6 +5,7 @@ import java.io.File;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
@@ -67,6 +68,12 @@ public class PlayerService extends Service {
 					mediaPlayer = MediaPlayer.create(this, uri);
 					mediaPlayer.setLooping(false);
 					mediaPlayer.start();
+					mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+						@Override
+						public void onCompletion(MediaPlayer arg0) {
+							stop();
+						}
+					});
 				} catch (IllegalStateException e) {
 					e.printStackTrace();
 				} catch (Exception e) {
