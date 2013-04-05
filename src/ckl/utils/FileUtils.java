@@ -7,16 +7,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import android.os.Environment;
+import android.util.Log;
 
 public class FileUtils {
-	private String SDPATH;
+	private static final String TAG = "FileUtils";
+	private String SDCardRoot;
 	
 	public String getSDPATH() {
-		return SDPATH;
+		return SDCardRoot;
 	}
 	
 	public FileUtils() {
-		SDPATH = Environment.getExternalStorageDirectory() + File.separator;
+		SDCardRoot = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
 	}
 	
 	/**
@@ -25,8 +27,8 @@ public class FileUtils {
 	 * @return
 	 * @throws IOException
 	 */
-	public File createSDFile(String fileName) throws IOException {
-		File file = new File(SDPATH + fileName);
+	public File createFileInSDCard(String fileName, String dir) throws IOException {
+		File file = new File(SDCardRoot + dir + File.separator + fileName);
 		file.createNewFile();
 		return file;
 	}
@@ -38,8 +40,10 @@ public class FileUtils {
 	 * @throws IOException
 	 */
 	public File createSDDir(String dirName) throws IOException {
-		File dir = new File(SDPATH + dirName);
-		dir.mkdirs();
+		File dir = new File(SDCardRoot + dirName + File.separator);
+		if (!dir.mkdirs()) {
+			Log.i(TAG, "mkdirs() falied! dir: " + dir.getAbsolutePath());
+		}
 		return dir;
 	}
 	
@@ -47,7 +51,7 @@ public class FileUtils {
 	 * 判断SD卡上文件是否存在
 	 */
 	public boolean isFileExist(String fileName){
-		File file = new File(SDPATH + fileName);
+		File file = new File(SDCardRoot + fileName);
 		return file.exists();
 	}
 	
@@ -59,7 +63,7 @@ public class FileUtils {
 		OutputStream output = null;
 		try {
 			createSDDir(path);
-			file = createSDFile(path + fileName);
+			file = createFileInSDCard(fileName, path);
 			output = new FileOutputStream(file);
 			byte[] buffer = new byte[4 * 1024];
 			int readsize = 0;
