@@ -1,13 +1,17 @@
 package ckl.utils;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.os.Environment;
 import android.util.Log;
+import ckl.model.Mp3Info;
 
 public class FileUtils {
 	private static final String TAG = "FileUtils";
@@ -81,5 +85,34 @@ public class FileUtils {
 			}
 		}
 		return file;
+	}
+	
+	/**
+	 * 读取目录中的mp3文件的名字和大小
+	 */
+	public List<Mp3Info> getMp3Files(String path) {
+		List<Mp3Info> infos = new ArrayList<Mp3Info>();
+		
+		File dir = new File(SDCardRoot + path);
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
+		
+		File[] files = dir.listFiles(new FileFilter() {
+			@Override
+			public boolean accept(File pathname) {
+				return pathname.getName().endsWith(".mp3");
+			}
+		});
+		
+		if (files != null) {
+			for (File f : files) {
+				Mp3Info info = new Mp3Info();
+				info.setMp3Name(f.getName());
+				info.setMp3Size("" + f.length());
+				infos.add(info);
+			}
+		}
+		return infos;
 	}
 }
