@@ -6,4 +6,7 @@
     <string name="action_settings">Settings</string>
 	<string name="update_list">更新列表</string>
 	<string name="about">关于</string>
+	<string name="mp3_play">播放</string>
+	<string name="mp3_pause">暂停</string>
+	<string name="mp3_stop">停止</string>
 </resources>

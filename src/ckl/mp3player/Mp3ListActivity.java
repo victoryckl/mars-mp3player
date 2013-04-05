@@ -41,12 +41,17 @@ public class Mp3ListActivity extends ListActivity {
 		init();
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		updateListView();
+	}
+	
 	private void init() {
 		HttpDownloader.initStrictMode();
 		
 		listView = (ListView)findViewById(android.R.id.list);
 		setListEmptyView();
-		updateListView();
 	}
 	
 	private void setListEmptyView() {
@@ -84,8 +89,8 @@ public class Mp3ListActivity extends ListActivity {
 	
 	private SimpleAdapter buildSimpleAdapter(List<Mp3Info> mp3Infos) {
 		List<HashMap<String, String>> list = new ArrayList<HashMap<String,String>>();
-		for (Iterator iterator = mp3Infos.iterator(); iterator.hasNext();) {
-			Mp3Info mp3Info = (Mp3Info)iterator.next();
+		for (Iterator<Mp3Info> iterator = mp3Infos.iterator(); iterator.hasNext();) {
+			Mp3Info mp3Info = iterator.next();
 			HashMap<String, String> map = new HashMap<String, String>();
 			map.put("mp3.name", mp3Info.getMp3Name());
 			map.put("mp3.size", mp3Info.getMp3Size());

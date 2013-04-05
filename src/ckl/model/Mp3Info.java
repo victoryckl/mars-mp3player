@@ -59,4 +59,8 @@ public class Mp3Info implements Serializable {
 				+ mp3Size + ", lrcName=" + lrcName + ", lrcSize=" + lrcSize
 				+ "]";
 	}
+
+	public boolean isSameMp3(Mp3Info info) {
+		return info.mp3Name.equals(mp3Name);
+	}
 }

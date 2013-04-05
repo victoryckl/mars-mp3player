@@ -7,7 +7,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 public class DownloadService extends Service {
 	private static final String TAG = "DownloadService";
@@ -46,7 +45,6 @@ public class DownloadService extends Service {
 				resultMsg = "文件已经存在，不需要重复下载！";
 			}
 			Log.i(TAG, resultMsg);
-//			Toast.makeText(getApplicationContext(), resultMsg, Toast.LENGTH_SHORT).show();
 		}
 	}
 }
