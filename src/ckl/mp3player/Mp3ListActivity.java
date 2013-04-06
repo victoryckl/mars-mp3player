@@ -17,6 +17,8 @@ import ckl.service.DownloadService;
 import ckl.utils.HttpDownloader;
 import ckl.xml.Mp3ListContentHandler;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.renderscript.Sampler;
 import android.app.Activity;
 import android.app.ListActivity;
@@ -44,7 +46,7 @@ public class Mp3ListActivity extends ListActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		updateListView();
+		startUpdateThread();
 	}
 	
 	private void init() {
@@ -69,7 +71,7 @@ public class Mp3ListActivity extends ListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getOrder()) {
 		case 100:
-			updateListView();
+			startUpdateThread();
 			break;
 		case 101:
 			
@@ -80,9 +82,24 @@ public class Mp3ListActivity extends ListActivity {
 		return super.onOptionsItemSelected(item);
 	}
 	
+	private Handler mHandler = new Handler() {
+		@Override
+		public void dispatchMessage(Message msg) {
+			updateListView();
+		}
+	};
+	
+	private void startUpdateThread() {
+		new Thread() {
+			public void run() {
+				String result = downloadXML(Constant.HOST_ADDRESS + "mp3/resources.xml");
+				mp3Infos = parse(result);
+				mHandler.sendEmptyMessage(0);
+			}
+		}.start();
+	}
+	
 	private void updateListView() {
-		String result = downloadXML(Constant.HOST_ADDRESS + "mp3/resources.xml");
-		mp3Infos = parse(result);
 		SimpleAdapter simpleAdapter = buildSimpleAdapter(mp3Infos);
 		listView.setAdapter(simpleAdapter);
 	}
