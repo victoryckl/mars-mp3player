@@ -24,7 +24,8 @@ public class LrcProcessor {
 			BufferedReader bufferedReader = new BufferedReader(inputReader);
 			
 			String line = null;
-			Pattern p = Pattern.compile("\\[([^\\]]+)\\]");
+//			Pattern p = Pattern.compile("\\[([^\\]]+)\\]");
+			Pattern p = Pattern.compile("^\\[\\d\\d:\\d\\d\\.\\d\\d\\]");//^\[\d\d:\d\d\.\d\d\]
 			String result = null;
 			while((line = bufferedReader.readLine()) != null) {
 //				Log.i(TAG, "line = " + line);

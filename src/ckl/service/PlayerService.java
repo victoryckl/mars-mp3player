@@ -137,6 +137,7 @@ public class PlayerService extends Service {
 	private void prepareLrc(String lrcName) {
 		try {
 			if (lrcName == null) {
+				Log.i(TAG, "prepareLrc() lrcName is null !");
 				return;
 			}
 			InputStream inputStream = new FileInputStream(Constant.SDCardRoot
@@ -175,12 +176,16 @@ public class PlayerService extends Service {
 						intent.putExtra("lrc_text", message);
 						sendBroadcast(intent);
 					}
-					if (times != null) {
+					if (!times.isEmpty()) {
 						mNextMill = (Long)times.poll();
 						message = (String)messages.poll();
 					}
 				}
-				mHandler.postDelayed(mUpdateTimeCallback, 200);
+				if (!times.isEmpty()) {
+					mHandler.postDelayed(mUpdateTimeCallback, 200);
+				} else {
+					mHandler.removeCallbacks(mUpdateTimeCallback);
+				}
 			}
 		}
 	}
