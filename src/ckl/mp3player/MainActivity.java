@@ -16,16 +16,6 @@ public class MainActivity extends TabActivity {
 
 		TabHost tabHost = getTabHost();
 		
-		Intent remoteIntent = new Intent();
-		remoteIntent.setClass(this, Mp3ListActivity.class);
-		
-		TabHost.TabSpec remoteSpec = tabHost.newTabSpec("Remote");
-		remoteSpec.setIndicator("Remote",
-				res.getDrawable(android.R.drawable.stat_sys_download));
-		
-		remoteSpec.setContent(remoteIntent);
-		tabHost.addTab(remoteSpec);
-		
 		Intent localIntent = new Intent();
 		localIntent.setClass(this, LocalMp3ListActivity.class);
 		
@@ -35,5 +25,15 @@ public class MainActivity extends TabActivity {
 		
 		localSpec.setContent(localIntent);
 		tabHost.addTab(localSpec);
+		
+		Intent remoteIntent = new Intent();
+		remoteIntent.setClass(this, Mp3ListActivity.class);
+		
+		TabHost.TabSpec remoteSpec = tabHost.newTabSpec("Remote");
+		remoteSpec.setIndicator("Remote",
+				res.getDrawable(android.R.drawable.stat_sys_download));
+		
+		remoteSpec.setContent(remoteIntent);
+		tabHost.addTab(remoteSpec);
 	}
 }
