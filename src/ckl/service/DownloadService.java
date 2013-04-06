@@ -34,6 +34,10 @@ public class DownloadService extends Service {
 		public void run() {
 			HttpDownloader downloader = new HttpDownloader();
 			int result = downloader.downFile(
+					Constant.HOST_ADDRESS + "mp3/" + mp3Info.getLrcName(), 
+					"mp3/", mp3Info.getLrcName());
+			
+			result = downloader.downFile(
 					Constant.HOST_ADDRESS + "mp3/" + mp3Info.getMp3Name(), 
 					"mp3/", mp3Info.getMp3Name());
 			String resultMsg = null;

@@ -45,6 +45,9 @@ public class FileUtils {
 	 */
 	public File createSDDir(String dirName) throws IOException {
 		File dir = new File(SDCardRoot + dirName + File.separator);
+		if (dir.exists()) {
+			return dir;
+		}
 		if (!dir.mkdirs()) {
 			Log.i(TAG, "mkdirs() falied! dir: " + dir.getAbsolutePath());
 		}
@@ -110,6 +113,15 @@ public class FileUtils {
 				Mp3Info info = new Mp3Info();
 				info.setMp3Name(f.getName());
 				info.setMp3Size("" + f.length());
+				
+				//lrc
+				String mp3Name = f.getName();
+				String lrcName = mp3Name.substring(0, mp3Name.length() - 3) + "lrc";
+				File lrcFile = new File(f.getParent() + File.separator + lrcName);
+				if (lrcFile.exists()) {
+					info.setLrcName(lrcFile.getName());
+					info.setLrcSize("" + lrcFile.length());
+				}
 				infos.add(info);
 			}
 		}
