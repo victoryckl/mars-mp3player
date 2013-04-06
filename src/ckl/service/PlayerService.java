@@ -32,22 +32,24 @@ public class PlayerService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Mp3Info mp3Info = (Mp3Info)intent.getSerializableExtra("mp3Info");
-		int msgId = intent.getIntExtra("MSG", Constant.PlayMsg.MSG_STOP);
-		Log.i(TAG, "msgId = " + msgId);
-		switch (msgId) {
-		case Constant.PlayMsg.MSG_PLAY:
-			play(mp3Info);
-			break;
-		case Constant.PlayMsg.MSG_PAUSE:
-			pause();
-			break;
-		case Constant.PlayMsg.MSG_STOP:
-			stop();
-			break;
-
-		default:
-			break;
+		if (intent != null) {
+			Mp3Info mp3Info = (Mp3Info)intent.getSerializableExtra("mp3Info");
+			int msgId = intent.getIntExtra("MSG", Constant.PlayMsg.MSG_STOP);
+			Log.i(TAG, "msgId = " + msgId);
+			switch (msgId) {
+			case Constant.PlayMsg.MSG_PLAY:
+				play(mp3Info);
+				break;
+			case Constant.PlayMsg.MSG_PAUSE:
+				pause();
+				break;
+			case Constant.PlayMsg.MSG_STOP:
+				stop();
+				break;
+	
+			default:
+				break;
+			}
 		}
 		return super.onStartCommand(intent, flags, startId);
 	}
