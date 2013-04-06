@@ -136,6 +136,9 @@ public class PlayerService extends Service {
 	private UpdateTimeCallback mUpdateTimeCallback;
 	private void prepareLrc(String lrcName) {
 		try {
+			if (lrcName == null) {
+				return;
+			}
 			InputStream inputStream = new FileInputStream(Constant.SDCardRoot
 					+ File.separator + "mp3" + File.separator + lrcName);
 			LrcProcessor lrcProcessor = new LrcProcessor();
@@ -161,9 +164,9 @@ public class PlayerService extends Service {
 		@Override
 		public void run() {
 			if (mediaPlayer != null) {
-				Log.i(TAG, "" + mediaPlayer.getCurrentPosition() + "/" + mediaPlayer.getDuration());
 				mCurrentMill = mediaPlayer.getCurrentPosition();
-				Log.i(TAG, "mNextMill: " + mNextMill);
+//				Log.i(TAG, "" + mediaPlayer.getCurrentPosition() + "/" + mediaPlayer.getDuration());
+//				Log.i(TAG, "mNextMill: " + mNextMill);
 				if (mCurrentMill >= mNextMill) {
 					Log.i(TAG, "mLrcView message = " + message);
 					if (message != null) {
@@ -172,12 +175,13 @@ public class PlayerService extends Service {
 						intent.putExtra("lrc_text", message);
 						sendBroadcast(intent);
 					}
-					mNextMill = (Long)times.poll();
-					message = (String)messages.poll();
+					if (times != null) {
+						mNextMill = (Long)times.poll();
+						message = (String)messages.poll();
+					}
 				}
 				mHandler.postDelayed(mUpdateTimeCallback, 200);
 			}
-
 		}
 	}
 }

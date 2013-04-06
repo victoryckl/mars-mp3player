@@ -1,6 +1,7 @@
 package ckl.lrc;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -19,28 +20,34 @@ public class LrcProcessor {
 		Queue<Long> timeMills = new LinkedList<Long>();
 		Queue<String> messages = new LinkedList<String>();
 		try {
-			InputStreamReader inputReader = new InputStreamReader(inputStream);
+			InputStreamReader inputReader = new InputStreamReader(inputStream, "GBK");
 			BufferedReader bufferedReader = new BufferedReader(inputReader);
 			
 			String line = null;
-			int i = 0;
 			Pattern p = Pattern.compile("\\[([^\\]]+)\\]");
 			String result = null;
 			while((line = bufferedReader.readLine()) != null) {
-				Log.i(TAG, "line = " + line);
-				i++;
-				Matcher m = p.matcher(line);
-				if (m.find()) {
-					if (result != null){
-						messages.add(result);
+//				Log.i(TAG, "line = " + line);
+				if (line.length() > 0) {
+					Matcher m = p.matcher(line);
+					if (m.find()) {
+						if (result != null){
+//							Log.i(TAG, "result --> " + result);
+							messages.add(result);
+							result = null;
+						}
+						String timeStr = m.group();
+						Long timeMill = time2Long(timeStr.substring(1, timeStr.length() -1));
+						timeMills.offer(timeMill);
+						String msg = line.substring(10);
+						if (msg != null) {
+							result = "" + msg + "\n";
+						}
+					} else {
+						if (result != null) {
+							result = result + line + "\n";
+						}
 					}
-					String timeStr = m.group();
-					Long timeMill = time2Long(timeStr.substring(1, timeStr.length() -1));
-					timeMills.offer(timeMill);
-					String msg = line.substring(10);
-					result = "" + msg + "\n";
-				} else {
-					result = result + line + "\n";
 				}
 			}
 			messages.add(result);
@@ -59,6 +66,7 @@ public class LrcProcessor {
 		int sec = Integer.parseInt(ss[0]);
 		int mill = Integer.parseInt(ss[1]);
 		long l = min * 60 * 1000 + sec * 1000 + mill * 10L;
+//		Log.i(TAG, "timeStr --> " + timeStr);
 		return l;
 	}
 }
