@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,6 +59,83 @@ public class LrcProcessor {
 			e.printStackTrace();
 		}
 		return queues;
+	}
+	
+	public List<LrcSentence> process_list(InputStream inputStream) {
+		List<LrcSentence> list = new ArrayList<LrcSentence>();
+		Queue<Long> timeMills = new LinkedList<Long>();
+		Queue<String> messages = new LinkedList<String>();
+		try {
+			InputStreamReader inputReader = new InputStreamReader(inputStream, "GBK");
+			BufferedReader bufferedReader = new BufferedReader(inputReader);
+			
+			String line = null;
+			String lrc = null;
+			long time = 0;
+			LrcSentence sentence = null;
+			
+//			Pattern p = Pattern.compile("\\[([^\\]]+)\\]");
+			Pattern p = Pattern.compile("^\\[\\d\\d:\\d\\d\\.\\d\\d\\]");//^\[\d\d:\d\d\.\d\d\]
+			
+			while((line = bufferedReader.readLine()) != null) {
+//				Log.i(TAG, "line = " + line);
+				if (line.length() > 0) {
+					Matcher m = p.matcher(line);
+					if (m.find()) {
+						if (lrc != null){
+//							Log.i(TAG, "lrc --> " + lrc);
+							sentence.setLrc(lrc);
+							lrc = null;
+							list.add(sentence);
+						}
+						String timeStr = m.group();
+						time = time2Long(timeStr.substring(1, timeStr.length() -1));
+						
+						sentence = new LrcSentence(time);
+						String msg = line.substring(10);
+						if (msg != null) {
+							lrc = "" + msg + "\n";
+						}
+					} else {
+						if (lrc != null) {
+							lrc = lrc + line + "\n";
+						}
+					}
+				}
+			}
+			sentence = new LrcSentence(lrc, time);
+			list.add(sentence);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		sort(list);
+		
+		printLrcList(list);
+		return list;
+	}
+	
+	public static void printLrcList(List<LrcSentence> list) {
+		if (list == null) {
+			Log.i(TAG, "printLrcList() list is null");
+			return ;
+		}
+		
+		int size = list.size();
+		if (size <= 0) {
+			Log.i(TAG, "printLrcList() list size == 0");
+			return ;
+		}
+		
+		for(int i = 0; i < size; i++) {
+			Log.i(TAG, list.get(i).toString());
+		}
+	}
+	
+	// sort by time
+	private List<LrcSentence> sort(List<LrcSentence> list) {
+		//TODO:
+		return list;
 	}
 	
 	private Long time2Long(String timeStr) {

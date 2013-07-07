@@ -2,9 +2,11 @@ package ckl.mp3player;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.sql.NClob;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 
 import android.R.mipmap;
@@ -22,6 +24,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import ckl.constant.Constant;
 import ckl.lrc.LrcProcessor;
+import ckl.lrc.LrcSentence;
+import ckl.lrc.LrcView;
 import ckl.model.Mp3Info;
 import ckl.service.PlayerService;
 
@@ -29,7 +33,7 @@ public class PlayerActivity extends Activity {
 	private static final String TAG = "PlayerActivity";
 	private Mp3Info mp3Info;
 	private Button mPlayBtn, mPauseBtn, mStopBtn;
-	private TextView mLrcView;
+	private LrcView mLrcView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +58,7 @@ public class PlayerActivity extends Activity {
 		mPauseBtn.setOnClickListener(mBtnClickListener);
 		mStopBtn.setOnClickListener(mBtnClickListener);
 
-		mLrcView = (TextView) findViewById(R.id.lrc_txt);
+		mLrcView = (LrcView) findViewById(R.id.lrc_txt);
 	}
 
 	private OnClickListener mBtnClickListener = new OnClickListener() {
@@ -76,8 +80,24 @@ public class PlayerActivity extends Activity {
 			}
 		}
 	};
-
+	
+	private List<LrcSentence> mLrcList;
 	private void play() {
+		
+		if (mp3Info.getLrcName() != null) {
+			LrcProcessor lrcProcessor = new LrcProcessor();
+			InputStream inputStream;
+			try {
+				inputStream = new FileInputStream(Constant.SDCardRoot
+						+ File.separator + "mp3" + File.separator + mp3Info.getLrcName());
+				mLrcList = lrcProcessor.process_list(inputStream);
+				mLrcView.setList(mLrcList);
+				mLrcView.updateUI();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		Intent intent = new Intent();
 		intent.putExtra("mp3Info", mp3Info);
 		intent.putExtra("MSG", Constant.PlayMsg.MSG_PLAY);
@@ -115,8 +135,7 @@ public class PlayerActivity extends Activity {
 	class LrcUpdateReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			String lrc = intent.getStringExtra("lrc_text");
-			mLrcView.setText(lrc);
+			mLrcView.setCurrentInfo(intent);
 		}
 	}
 	

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 
 import android.app.Service;
@@ -17,6 +18,7 @@ import android.util.Log;
 import ckl.constant.Constant;
 import ckl.constant.Constant.PlayState;
 import ckl.lrc.LrcProcessor;
+import ckl.lrc.LrcSentence;
 import ckl.model.Mp3Info;
 
 public class PlayerService extends Service {
@@ -134,7 +136,8 @@ public class PlayerService extends Service {
 	//------------------------
 	private Handler mHandler = new Handler();
 	private long mCurrentMill, mNextMill;
-	private ArrayList<Queue> queues;
+//	private ArrayList<Queue> queues;
+	private List<LrcSentence> mLrcList;
 	private UpdateTimeCallback mUpdateTimeCallback;
 	private void prepareLrc(String lrcName) {
 		try {
@@ -142,11 +145,13 @@ public class PlayerService extends Service {
 				Log.i(TAG, "prepareLrc() lrcName is null !");
 				return;
 			}
+			
+			LrcProcessor lrcProcessor = new LrcProcessor();
 			InputStream inputStream = new FileInputStream(Constant.SDCardRoot
 					+ File.separator + "mp3" + File.separator + lrcName);
-			LrcProcessor lrcProcessor = new LrcProcessor();
-			queues = lrcProcessor.process(inputStream);
-			mUpdateTimeCallback = new UpdateTimeCallback(queues);
+			
+			mLrcList = lrcProcessor.process_list(inputStream);
+			mUpdateTimeCallback = new UpdateTimeCallback(mLrcList);
 			mCurrentMill = 0;
 			mNextMill = 0;
 		} catch (Exception e) {
@@ -158,37 +163,68 @@ public class PlayerService extends Service {
 		private Queue<Long> times;
 		private Queue<String> messages;
 		private String message;
-		public UpdateTimeCallback(ArrayList<Queue> queues) {
-			times = queues.get(0);
-			messages = queues.get(1);
-			mNextMill = (Long)times.poll();
-			message = (String)messages.poll();
+		private List<LrcSentence> list;
+		private int mLastIndex = -1;
+		
+		public UpdateTimeCallback(List<LrcSentence> list) {
+			this.list = list;
 		}
+		
 		@Override
 		public void run() {
 			if (mediaPlayer != null) {
 				mCurrentMill = mediaPlayer.getCurrentPosition();
-//				Log.i(TAG, "" + mediaPlayer.getCurrentPosition() + "/" + mediaPlayer.getDuration());
-//				Log.i(TAG, "mNextMill: " + mNextMill);
-				if (mCurrentMill >= mNextMill) {
-					Log.i(TAG, "mLrcView message = " + message);
-					if (message != null) {
-						Intent intent = new Intent();
-						intent.setAction(Constant.ACTION_LRC_UPDATE);
-						intent.putExtra("lrc_text", message);
-						sendBroadcast(intent);
-					}
-					if (!times.isEmpty()) {
-						mNextMill = (Long)times.poll();
-						message = (String)messages.poll();
-					}
+				int index = getCurrentIndex(mCurrentMill);
+				if (mLastIndex != index) {
+					mLastIndex = index;
+					long playtime = getOneLrcPlayTime(index);
+					
+					Intent intent = new Intent();
+					intent.setAction(Constant.ACTION_LRC_UPDATE);
+					intent.putExtra("index", index);
+					intent.putExtra("playtime", playtime);
+					sendBroadcast(intent);
 				}
-				if (!times.isEmpty()) {
+				if (index < list.size()) {
 					mHandler.postDelayed(mUpdateTimeCallback, 200);
 				} else {
 					mHandler.removeCallbacks(mUpdateTimeCallback);
+					mLastIndex = -1;
 				}
 			}
+		}
+		
+		private int getCurrentIndex(long time) {
+			int index = -1;
+			int size = list.size();
+			long t = 0;
+			
+			for (int i = size - 1; i >= 0; i--) {
+				t = list.get(i).getTime();
+				time += 10;//提前变色
+				if (time >= t) {
+					index = i;
+					break;
+				}
+			}
+			
+			return index;
+		}
+		
+		private long getOneLrcPlayTime(int index) {
+			long time = 0;
+			long start = list.get(index).getTime();
+			long end = 0;
+			
+			if (index + 1 >= list.size()) {
+				end = mediaPlayer.getDuration();
+			} else {
+				end = list.get(index + 1).getTime(); 
+			}
+			
+			time = end - start;
+			
+			return time;
 		}
 	}
 }
